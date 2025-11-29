@@ -1,0 +1,5 @@
+{
+  "name": "Beam x Flink Interactive 101",
+  "description": "An interactive educational platform visualizing how Apache Beam pipelines run on Apache Flink clusters. Features pipeline simulation, cluster resource management, and interactive debugging lessons.",
+  "requestFramePermissions": []
+}
