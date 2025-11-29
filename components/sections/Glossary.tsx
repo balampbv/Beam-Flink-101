@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, X, Book, ArrowRight, CornerRightUp } from 'lucide-react';
+import { Search, X, Book, ArrowRight, CornerRightUp, Layers, Zap, Globe } from 'lucide-react';
 
 interface Term {
   id: string;
@@ -32,12 +32,12 @@ export const Glossary: React.FC = () => {
   const filteredTerms = terms.filter(t => t.term.toLowerCase().includes(search.toLowerCase()));
 
   return (
-    <div className="h-full flex flex-col md:flex-row bg-slate-50">
+    <div className="h-full flex flex-col md:flex-row bg-slate-50 dark:bg-slate-950 transition-colors duration-300">
       {/* Sidebar List */}
-      <div className="w-full md:w-1/3 lg:w-1/4 bg-white border-r border-slate-200 flex flex-col h-full">
-        <div className="p-4 border-b border-slate-200">
-          <h2 className="text-xl font-bold flex items-center gap-2 text-slate-800 mb-4">
-            <Book className="text-indigo-600" /> Glossary
+      <div className="w-full md:w-1/3 lg:w-1/4 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col h-full transition-colors duration-300">
+        <div className="p-4 border-b border-slate-200 dark:border-slate-800">
+          <h2 className="text-xl font-bold flex items-center gap-2 text-slate-800 dark:text-slate-100 mb-4">
+            <Book className="text-indigo-600 dark:text-indigo-400" /> Glossary
           </h2>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -46,7 +46,7 @@ export const Glossary: React.FC = () => {
               placeholder="Search terms..." 
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 bg-slate-100 border-none rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+              className="w-full pl-9 pr-4 py-2 bg-slate-100 dark:bg-slate-800 border-none rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none text-slate-800 dark:text-slate-200 placeholder-slate-400"
             />
           </div>
         </div>
@@ -57,23 +57,29 @@ export const Glossary: React.FC = () => {
               onClick={() => setSelectedTerm(t)}
               className={`w-full text-left px-4 py-3 rounded-lg text-sm font-medium transition-colors flex justify-between items-center group ${
                 selectedTerm?.id === t.id 
-                  ? 'bg-indigo-50 text-indigo-700' 
-                  : 'text-slate-600 hover:bg-slate-50'
+                  ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300' 
+                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
               }`}
             >
-              <span>{t.term}</span>
-              <span className={`text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider ${
-                t.category === 'Beam' ? 'bg-orange-100 text-orange-700' :
-                t.category === 'Flink' ? 'bg-rose-100 text-rose-700' :
-                'bg-slate-100 text-slate-600'
-              }`}>{t.category}</span>
+              <div className="flex items-center gap-3">
+                 <div className={`p-1.5 rounded-md flex-shrink-0 ${
+                    t.category === 'Beam' ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400' :
+                    t.category === 'Flink' ? 'bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400' :
+                    'bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
+                 }`}>
+                    {t.category === 'Beam' && <Layers className="w-4 h-4" />}
+                    {t.category === 'Flink' && <Zap className="w-4 h-4" />}
+                    {t.category === 'General' && <Globe className="w-4 h-4" />}
+                 </div>
+                 <span>{t.term}</span>
+              </div>
             </button>
           ))}
         </div>
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 p-8 md:p-12 overflow-y-auto flex items-center justify-center relative bg-slate-50/50">
+      <div className="flex-1 p-8 md:p-12 overflow-y-auto flex items-center justify-center relative bg-slate-50/50 dark:bg-slate-950/50">
         <AnimatePresence mode="wait">
           {selectedTerm ? (
             <motion.div
@@ -83,29 +89,32 @@ export const Glossary: React.FC = () => {
               exit={{ opacity: 0, y: -10 }}
               className="w-full max-w-2xl"
             >
-              <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
-                <div className="h-64 bg-slate-900 relative flex items-center justify-center overflow-hidden p-8">
+              <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 overflow-hidden transition-colors duration-300">
+                <div className="h-64 bg-slate-900 relative flex items-center justify-center overflow-hidden p-8 border-b border-slate-800">
                   <TermVisual id={selectedTerm.id} />
                 </div>
                 <div className="p-8">
                   <div className="flex items-center justify-between mb-4">
-                     <h1 className="text-3xl font-bold text-slate-900">{selectedTerm.term}</h1>
-                     <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
-                        selectedTerm.category === 'Beam' ? 'bg-orange-100 text-orange-700' :
-                        selectedTerm.category === 'Flink' ? 'bg-rose-100 text-rose-700' :
-                        'bg-slate-100 text-slate-600'
+                     <h1 className="text-3xl font-bold text-slate-900 dark:text-white">{selectedTerm.term}</h1>
+                     <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
+                        selectedTerm.category === 'Beam' ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300' :
+                        selectedTerm.category === 'Flink' ? 'bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-300' :
+                        'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
                       }`}>
+                        {selectedTerm.category === 'Beam' && <Layers className="w-3 h-3" />}
+                        {selectedTerm.category === 'Flink' && <Zap className="w-3 h-3" />}
+                        {selectedTerm.category === 'General' && <Globe className="w-3 h-3" />}
                         {selectedTerm.category}
-                     </span>
+                     </div>
                   </div>
-                  <p className="text-lg text-slate-600 leading-relaxed">
+                  <p className="text-lg text-slate-600 dark:text-slate-300 leading-relaxed">
                     {selectedTerm.definition}
                   </p>
                 </div>
               </div>
             </motion.div>
           ) : (
-            <div className="text-center text-slate-400">
+            <div className="text-center text-slate-400 dark:text-slate-500">
               <Book className="w-16 h-16 mx-auto mb-4 opacity-20" />
               <p>Select a term to view its definition and visualization.</p>
             </div>

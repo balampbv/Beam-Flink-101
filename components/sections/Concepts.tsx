@@ -64,7 +64,7 @@ export const Concepts: React.FC = () => {
             className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 p-6 cursor-pointer hover:shadow-md hover:border-indigo-200 dark:hover:border-indigo-800 transition-all group"
           >
             <div className={`w-12 h-12 rounded-lg ${c.color} bg-opacity-10 flex items-center justify-center text-${c.color.split('-')[1]}-600 dark:text-${c.color.split('-')[1]}-400 mb-4 group-hover:scale-110 transition-transform`}>
-              {React.cloneElement(c.icon as React.ReactElement, { className: `w-6 h-6 text-${c.color.replace('bg-', 'text-')}` })}
+              {React.cloneElement(c.icon as React.ReactElement<any>, { className: `w-6 h-6 text-${c.color.replace('bg-', 'text-')}` })}
             </div>
             <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-2">{c.title}</h3>
             <p className="text-slate-500 dark:text-slate-400 text-sm">{c.description}</p>
