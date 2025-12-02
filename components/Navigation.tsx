@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, BookOpen, GitGraph, Cpu, Bug, Library, Sun, Moon } from 'lucide-react';
+import { Home, BookOpen, GitGraph, Cpu, Bug, Library, Sun, Moon, Map } from 'lucide-react';
 import { AppSection } from '../types';
 
 interface NavProps {
@@ -33,6 +33,7 @@ export const Navigation: React.FC<NavProps> = ({ current, onNavigate, darkMode, 
 
       <nav className="flex-1">
         <NavItem section={AppSection.HOME} icon={Home} label="Overview" current={current} onClick={onNavigate} />
+        <NavItem section={AppSection.GUIDE} icon={Map} label="The Guide" current={current} onClick={onNavigate} />
         <NavItem section={AppSection.CONCEPTS} icon={BookOpen} label="Concepts" current={current} onClick={onNavigate} />
         <NavItem section={AppSection.PIPELINE} icon={GitGraph} label="Pipeline Builder" current={current} onClick={onNavigate} />
         <NavItem section={AppSection.FLINK_SIM} icon={Cpu} label="Flink Cluster" current={current} onClick={onNavigate} />

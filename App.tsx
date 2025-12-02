@@ -7,6 +7,7 @@ import { PipelinePlayground } from './components/sections/PipelinePlayground';
 import { FlinkSimulator } from './components/sections/FlinkSimulator';
 import { DebugLessons } from './components/sections/DebugLessons';
 import { Glossary } from './components/sections/Glossary';
+import { Guide } from './components/sections/Guide';
 import { AppSection } from './types';
 
 const App: React.FC = () => {
@@ -25,6 +26,8 @@ const App: React.FC = () => {
     switch (section) {
       case AppSection.HOME:
         return <Hero setSection={setSection} />;
+      case AppSection.GUIDE:
+        return <Guide />;
       case AppSection.CONCEPTS:
         return <Concepts />;
       case AppSection.PIPELINE:

@@ -1,5 +1,6 @@
 export enum AppSection {
   HOME = 'HOME',
+  GUIDE = 'GUIDE',
   CONCEPTS = 'CONCEPTS',
   PIPELINE = 'PIPELINE',
   FLINK_SIM = 'FLINK_SIM',
