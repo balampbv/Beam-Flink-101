@@ -1,28 +1,107 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, X, Book, ArrowRight, CornerRightUp, Layers, Zap, Globe } from 'lucide-react';
+import { Search, X, Book, ArrowRight, CornerRightUp, Layers, Zap, Globe, AlignLeft } from 'lucide-react';
 
 interface Term {
   id: string;
   term: string;
   definition: string;
+  details: string;
   category: 'Beam' | 'Flink' | 'General';
 }
 
 const terms: Term[] = [
-  { id: 'pcollection', term: 'PCollection', definition: 'The core abstraction in Beam: an immutable, distributed dataset. It can be bounded (batch) or unbounded (streaming).', category: 'Beam' },
-  { id: 'pardo', term: 'ParDo', definition: 'The core parallel processing operation in Beam. Similar to "Map", but more flexible: one input can produce 0, 1, or many outputs.', category: 'Beam' },
-  { id: 'watermark', term: 'Watermark', definition: 'A timestamp representing the progress of event time. "No events older than T will arrive". Triggers windows.', category: 'Beam' },
-  { id: 'backpressure', term: 'Backpressure', definition: 'When a downstream operator is too slow, buffers fill up, forcing upstream operators to slow down. This propagates to the source.', category: 'General' },
-  { id: 'checkpoint', term: 'Checkpoint', definition: 'A periodic, consistent snapshot of the entire distributed job state, used for fault tolerance and recovery.', category: 'Flink' },
-  { id: 'state', term: 'State', definition: 'Information remembered across events (e.g., a counter, a buffer). Managed by the runner and fault-tolerant.', category: 'Beam' },
-  { id: 'taskmanager', term: 'TaskManager', definition: 'The worker process in Flink. It executes tasks in one or more slots.', category: 'Flink' },
-  { id: 'slot', term: 'Slot', definition: 'A slice of resources (CPU/Memory) in a TaskManager. Determines the maximum parallelism per TaskManager.', category: 'Flink' },
-  { id: 'chaining', term: 'Chaining', definition: 'Optimization where multiple operators are fused into a single thread to reduce serialization and network overhead.', category: 'Flink' },
-  { id: 'sideinput', term: 'Side Input', definition: 'An additional input to a ParDo, usually smaller and slowly changing (e.g., a lookup table broadcast to all workers).', category: 'Beam' },
-  { id: 'akka', term: 'Akka Framesize', definition: 'The maximum size of a message sent between Flink components (default 10MB). Large records can crash the job if they exceed this.', category: 'Flink' },
-  { id: 'shuffle', term: 'Shuffle', definition: 'Redistributing data across the cluster, typically for GroupByKey operations. Data is partitioned by key.', category: 'General' },
-  { id: 'partition', term: 'Partition', definition: 'A subset of the data stream processed independently. Parallelism implies multiple partitions.', category: 'General' },
+  { 
+    id: 'pcollection', 
+    term: 'PCollection', 
+    definition: 'The core abstraction in Beam: an immutable, distributed dataset. It can be bounded (batch) or unbounded (streaming).', 
+    details: 'A PCollection (Parallel Collection) is the fundamental data structure in Apache Beam. It represents a potentially huge, distributed dataset. PCollections are immutable; applying a transformation to a PCollection yields a new PCollection. They can be bounded (fixed size, batch processing) or unbounded (infinite, stream processing). Every element in a PCollection has a timestamp and is associated with a Window, which is crucial for event-time processing.',
+    category: 'Beam' 
+  },
+  { 
+    id: 'pardo', 
+    term: 'ParDo', 
+    definition: 'The core parallel processing operation in Beam. Similar to "Map", but more flexible: one input can produce 0, 1, or many outputs.', 
+    details: 'ParDo is the most generic parallel processing primitive in Beam. It is similar to the "Map" or "FlatMap" phase in MapReduce but significantly more powerful. It invokes a user-specified function (DoFn) on each element of the input PCollection. A ParDo can filter elements, produce multiple outputs for a single input, or output to different side outputs (Tagging). DoFns have a lifecycle (setup, startBundle, finishBundle, teardown) allowing for resource management like database connections.',
+    category: 'Beam' 
+  },
+  { 
+    id: 'watermark', 
+    term: 'Watermark', 
+    definition: 'A timestamp representing the progress of event time. "No events older than T will arrive". Triggers windows.', 
+    details: 'Watermarks are the mechanism Beam and Flink use to solve the problem of out-of-order data in streaming. A watermark is a monotonically increasing timestamp "T" that asserts: "The system believes all data with event time less than T has arrived." When the watermark passes the end of a window, the window is considered complete and can trigger its results. Data arriving after the watermark is considered "late" and requires special handling via "Allowed Lateness" configuration.',
+    category: 'Beam' 
+  },
+  { 
+    id: 'backpressure', 
+    term: 'Backpressure', 
+    definition: 'When a downstream operator is too slow, buffers fill up, forcing upstream operators to slow down. This propagates to the source.', 
+    details: 'Backpressure occurs when a system cannot process incoming data as fast as it arrives. In Flink, if a downstream operator (e.g., a complex calculation or a slow database sink) is slow, its input buffers fill up. It stops requesting new data from upstream. This "pressure" propagates up the execution graph all the way to the source, effectively slowing down ingestion. This is a safety mechanism to prevent the system from crashing under load (Out of Memory) but results in increased latency.',
+    category: 'General' 
+  },
+  { 
+    id: 'checkpoint', 
+    term: 'Checkpoint', 
+    definition: 'A periodic, consistent snapshot of the entire distributed job state, used for fault tolerance and recovery.', 
+    details: 'Checkpoints are the core of Flink\'s fault tolerance mechanism. Flink injects "Checkpoint Barriers" into the data stream at the source. These barriers flow through the graph. When an operator receives barriers from all its inputs, it snapshots its local state (e.g., current counts, buffers) to durable storage (like HDFS or S3). This algorithm is a variation of Chandy-Lamport. If the job fails, Flink restores all operators to the state of the last completed checkpoint, ensuring exactly-once processing semantics.',
+    category: 'Flink' 
+  },
+  { 
+    id: 'state', 
+    term: 'State', 
+    definition: 'Information remembered across events (e.g., a counter, a buffer). Managed by the runner and fault-tolerant.', 
+    details: 'State allows operations to remember information across multiple independent events. In streaming, operations like aggregations (sum, count) or complex pattern matching need to store data. Beam offers partitioned state (Keyed State) like ValueState, BagState, and MapState. This state is managed by the runner (Flink), stored locally (e.g., on the TaskManager heap or in embedded RocksDB), and backed up during checkpoints.',
+    category: 'Beam' 
+  },
+  { 
+    id: 'taskmanager', 
+    term: 'TaskManager', 
+    definition: 'The worker process in Flink. It executes tasks in one or more slots.', 
+    details: 'A TaskManager (Worker) is a JVM process in a Flink cluster that executes the actual data processing logic. It accepts tasks from the JobManager. A TaskManager can have multiple task slots, allowing it to execute multiple subtasks in parallel threads. It manages data exchange (network shuffle) between itself and other TaskManagers and handles local state management.',
+    category: 'Flink' 
+  },
+  { 
+    id: 'slot', 
+    term: 'Slot', 
+    definition: 'A slice of resources (CPU/Memory) in a TaskManager. Determines the maximum parallelism per TaskManager.', 
+    details: 'A Task Slot represents a fixed slice of resources in a TaskManager. If a TaskManager is configured with 3 slots, it dedicates 1/3 of its managed memory to each slot. Slots provide resource isolation (primarily memory) but typically share CPU threads/cores. The total number of slots in a cluster limits the maximum parallelism a Flink job can achieve. One slot can run one slice of a parallel pipeline.',
+    category: 'Flink' 
+  },
+  { 
+    id: 'chaining', 
+    term: 'Chaining', 
+    definition: 'Optimization where multiple operators are fused into a single thread to reduce serialization and network overhead.', 
+    details: 'Operator Chaining is a critical performance optimization in Flink. Consecutive operators (e.g., Source -> Map -> Filter) that have the same degree of parallelism are fused into a single task running in one thread. This eliminates the overhead of serialization/deserialization, thread switching, and network buffering, allowing data to be passed effectively as object references between functions.',
+    category: 'Flink' 
+  },
+  { 
+    id: 'sideinput', 
+    term: 'Side Input', 
+    definition: 'An additional input to a ParDo, usually smaller and slowly changing (e.g., a lookup table broadcast to all workers).', 
+    details: 'Side Inputs allow a ParDo transform to access additional data beyond the main input stream. For example, a main stream of "Orders" might need to look up exchange rates from a slowly updating "Rates" stream. The "Rates" PCollection is broadcast to all workers as a Side Input. The main stream processing for a window will be buffered until the corresponding window of the Side Input is ready.',
+    category: 'Beam' 
+  },
+  { 
+    id: 'akka', 
+    term: 'Akka Framesize', 
+    definition: 'The maximum size of a message sent between Flink components (default 10MB). Large records can crash the job if they exceed this.', 
+    details: 'Flink uses the Akka actor system for control messages (coordination between JobManager and TaskManager). The `akka.framesize` setting limits the maximum message size (default is often 10MB). While data flows through Netty, control metadata or very large single records in older Flink versions might traverse Akka paths. If a state snapshot metadata or a closure is larger than this limit, the job will fail with a `TooLongFrameException`.',
+    category: 'Flink' 
+  },
+  { 
+    id: 'shuffle', 
+    term: 'Shuffle', 
+    definition: 'Redistributing data across the cluster, typically for GroupByKey operations. Data is partitioned by key.', 
+    details: 'A Shuffle is the process of redistributing data between operators, usually involving a network transfer. Operations like `GroupByKey` or `rebalance` trigger a shuffle. Data is hashed by key and sent to the specific TaskManager responsible for that key range. Shuffles are expensive operations involving serialization, network I/O, and often disk I/O (spill-to-disk) if buffers are full.',
+    category: 'General' 
+  },
+  { 
+    id: 'partition', 
+    term: 'Partition', 
+    definition: 'A subset of the data stream processed independently. Parallelism implies multiple partitions.', 
+    details: 'A Partition is a subset of a PCollection or Stream that is processed independently. When you set parallelism to 10, the logical stream is divided into 10 physical partitions. Each partition is processed by a separate SubTask instance. Keyed streams are logically partitioned by key, ensuring all records with the same key end up in the same partition to guarantee correctness for stateful operations.',
+    category: 'General' 
+  },
 ];
 
 export const Glossary: React.FC = () => {
@@ -107,9 +186,18 @@ export const Glossary: React.FC = () => {
                         {selectedTerm.category}
                      </div>
                   </div>
-                  <p className="text-lg text-slate-600 dark:text-slate-300 leading-relaxed">
+                  <p className="text-lg text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
                     {selectedTerm.definition}
                   </p>
+                  
+                  <div className="mt-8 pt-6 border-t border-slate-200 dark:border-slate-800">
+                      <h3 className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+                        <AlignLeft className="w-3 h-3"/> Deep Dive
+                      </h3>
+                      <p className="text-slate-600 dark:text-slate-400 leading-relaxed whitespace-pre-line text-sm">
+                        {selectedTerm.details}
+                      </p>
+                  </div>
                 </div>
               </div>
             </motion.div>
